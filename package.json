@@ -1,0 +1,19 @@
+{
+  "name": "aws-todolist",
+  "version": "1.0.0",
+  "description": "",
+  "author": "",
+  "license": "MIT",
+  "scripts": {
+    "deploy:dev": "serverless deploy --verbose --stage dev --region us-east-1",
+    "deploy:prod": "serverless deploy --verbose --stage prod --region us-east-1 --aws-profile default"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.284.0",
+    "@aws-sdk/lib-dynamodb": "^3.284.0",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "serverless": "^3.28.1"
+  }
+}

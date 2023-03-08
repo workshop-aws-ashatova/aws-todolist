@@ -1,0 +1,102 @@
+service: aws-todolist
+
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs14.x
+  stage: ${opt:stage}
+  region: us-east-1
+  environment:
+    STAGE: ${self:provider.stage}
+    DYNAMODB_TABLE: ${self:service}-${self:provider.stage}
+  iam:
+    role:
+      statements:
+        - Effect: Allow
+          Action:
+            - dynamodb:Scan
+            - dynamodb:GetItem
+            - dynamodb:PutItem
+            - dynamodb:UpdateItem
+            - dynamodb:DeleteItem
+          Resource:
+            - 'Fn::GetAtt': [TasksDynamoDbTable, Arn]
+
+package:
+  individually: true
+  exclude:
+    - '**/*'
+
+functions:
+  create:
+    handler: functions/create.handler
+    package:
+      include:
+        - node_modules/**
+        - functions/create.js
+    events:
+      - http:
+          path: tasks
+          method: post
+          cors: true
+  list:
+    handler: functions/list.handler
+    package:
+      include:
+        - node_modules/**
+        - functions/list.js
+    events:
+      - http:
+          path: tasks
+          method: get
+          cors: true
+  get:
+    handler: functions/get.handler
+    package:
+      include:
+        - node_modules/**
+        - functions/get.js
+    events:
+      - http:
+          path: tasks/{id}
+          method: get
+          cors: true
+  update:
+    handler: functions/update.handler
+    package:
+      include:
+        - node_modules/**
+        - functions/update.js
+    events:
+      - http:
+          path: tasks/{id}
+          method: put
+          cors: true
+  delete:
+    handler: functions/delete.handler
+    package:
+      include:
+        - node_modules/**
+        - functions/delete.js
+    events:
+      - http:
+          path: tasks/{id}
+          method: delete
+          cors: true
+
+resources:
+  Resources:
+    TasksDynamoDbTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: id
+            AttributeType: S
+        KeySchema:
+          - AttributeName: id
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:provider.environment.DYNAMODB_TABLE}
