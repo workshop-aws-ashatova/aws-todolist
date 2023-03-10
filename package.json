@@ -5,8 +5,11 @@
   "author": "",
   "license": "MIT",
   "scripts": {
+    "build": "npm install",
     "deploy:dev": "serverless deploy --verbose --stage dev --region us-east-1",
-    "deploy:prod": "serverless deploy --verbose --stage prod --region us-east-1 --aws-profile default"
+    "deploy:prod": "serverless deploy --verbose --stage prod --region us-east-1 --aws-profile default",
+    "destroy:dev": "serverless remove --verbose --stage dev --region us-east-1",
+    "destroy:prod": "serverless remove --verbose --stage prod --region us-east-1 --aws-profile default"
   },
   "dependencies": {
     "@aws-sdk/client-dynamodb": "^3.284.0",
