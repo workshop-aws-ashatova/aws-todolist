@@ -1,40 +1,40 @@
 'use strict';
 
-const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
-const { DeleteCommand } = require('@aws-sdk/lib-dynamodb');
+const db = require('database');
+const {
+  HTTPError,
+  HTTPInternalServerError,
+  HTTPNotFoundError
+} = require('httpErrors');
 
-const TABLE_NAME = process.env.DYNAMODB_TABLE;
-const REGION = process.env.REGION;
-
-const dynamoDbClient = new DynamoDBClient({ region: REGION });
+const response = {
+  statusCode: 204,
+  body: ''
+};
 
 exports.handler = async (event, context) => {
   try {
     // Command to DynamoDB
-    const params = {
-      TableName: TABLE_NAME,
-      Key: {
-        id: event.pathParameters.id
-      }
-    };
-    const command = new DeleteCommand(params);
-    await dynamoDbClient.send(command);
+    const result = await db.getTask(event.pathParameters.id);
+    if (!result) {
+      throw new HTTPNotFoundError('Task not found');
+    }
+
+    // Command to DynamoDB
+    await db.deleteTask(event.pathParameters.id);
 
     // Send Response
-    const response = {
-      statusCode: 204,
-      body: JSON.stringify({})
-    };
+    response.body = JSON.stringify(result);
+    response.statusCode = 204;
     return response;
   } catch (ex) {
-    // Send Response Error
     console.error(ex);
-    const response = {
-      statusCode: ex.statusCode || 500,
-      body: JSON.stringify({
-        message: 'No se pudo eliminar el item'
-      })
-    };
+
+    // Send Response Error
+    let error = ex instanceof HTTPError ? ex : new HTTPInternalServerError();
+
+    response.body = JSON.stringify(error);
+    response.statusCode = error.statusCode;
     return response;
   }
 };

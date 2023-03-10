@@ -5,14 +5,14 @@
   "author": "",
   "license": "MIT",
   "scripts": {
+    "build:layers:database": "(cd layers/database/nodejs && npm install && cp ./*.js ./node_modules)",
+    "build:layers:utils": "(cd layers/utils/nodejs && npm install && cp ./*.js ./node_modules)",
+    "build:layers": "npm run build:layers:database & npm run build:layers:utils",
+    "build": "npm run build:layers",
     "deploy:dev": "serverless deploy --verbose --stage dev --region us-east-1",
     "deploy:prod": "serverless deploy --verbose --stage prod --region us-east-1 --aws-profile default"
   },
-  "dependencies": {
-    "@aws-sdk/client-dynamodb": "^3.284.0",
-    "@aws-sdk/lib-dynamodb": "^3.284.0",
-    "uuid": "^9.0.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "serverless": "^3.28.1"
   }

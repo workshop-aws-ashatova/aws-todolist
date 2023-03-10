@@ -9,7 +9,8 @@ provider:
   region: us-east-1
   environment:
     STAGE: ${self:provider.stage}
-    DYNAMODB_TABLE: ${self:service}-${self:provider.stage}
+    BASE_RESOURCES_NAME: ${self:service}-${self:provider.stage}
+    DYNAMODB_TABLE_TASKS: ${self:provider.environment.BASE_RESOURCES_NAME}-tasks
   iam:
     role:
       statements:
@@ -28,6 +29,24 @@ package:
   exclude:
     - '**/*'
 
+layers:
+  database:
+    name: ${self:provider.environment.BASE_RESOURCES_NAME}-layers-database
+    path: layers/database
+    compatibleRuntimes:
+      - nodejs14.x
+    package:
+      include:
+        - ./**
+  utils:
+    name: ${self:provider.environment.BASE_RESOURCES_NAME}-layers-utils
+    path: layers/utils
+    compatibleRuntimes:
+      - nodejs14.x
+    package:
+      include:
+        - ./**
+
 functions:
   create:
     handler: functions/create.handler
@@ -35,6 +54,9 @@ functions:
       include:
         - node_modules/**
         - functions/create.js
+    layers:
+      - { Ref: UtilsLambdaLayer }
+      - { Ref: DatabaseLambdaLayer }
     events:
       - http:
           path: tasks
@@ -46,6 +68,9 @@ functions:
       include:
         - node_modules/**
         - functions/list.js
+    layers:
+      - { Ref: UtilsLambdaLayer }
+      - { Ref: DatabaseLambdaLayer }
     events:
       - http:
           path: tasks
@@ -57,6 +82,9 @@ functions:
       include:
         - node_modules/**
         - functions/get.js
+    layers:
+      - { Ref: UtilsLambdaLayer }
+      - { Ref: DatabaseLambdaLayer }
     events:
       - http:
           path: tasks/{id}
@@ -68,6 +96,9 @@ functions:
       include:
         - node_modules/**
         - functions/update.js
+    layers:
+      - { Ref: UtilsLambdaLayer }
+      - { Ref: DatabaseLambdaLayer }
     events:
       - http:
           path: tasks/{id}
@@ -79,6 +110,9 @@ functions:
       include:
         - node_modules/**
         - functions/delete.js
+    layers:
+      - { Ref: UtilsLambdaLayer }
+      - { Ref: DatabaseLambdaLayer }
     events:
       - http:
           path: tasks/{id}
@@ -90,6 +124,7 @@ resources:
     TasksDynamoDbTable:
       Type: 'AWS::DynamoDB::Table'
       Properties:
+        TableName: ${self:provider.environment.DYNAMODB_TABLE_TASKS}
         AttributeDefinitions:
           - AttributeName: id
             AttributeType: S
@@ -99,4 +134,3 @@ resources:
         ProvisionedThroughput:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
-        TableName: ${self:provider.environment.DYNAMODB_TABLE}

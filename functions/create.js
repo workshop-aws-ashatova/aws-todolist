@@ -1,58 +1,59 @@
 'use strict';
 
-const uuid = require('uuid');
-const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
-const { PutCommand } = require('@aws-sdk/lib-dynamodb');
+const { generateUUID } = require('helpers');
+const db = require('database');
+const {
+  HTTPError,
+  HTTPInternalServerError,
+  HTTPBadRequestError
+} = require('httpErrors');
 
-const TABLE_NAME = process.env.DYNAMODB_TABLE;
-const REGION = process.env.REGION;
-
-const dynamoDbClient = new DynamoDBClient({ region: REGION });
+const response = {
+  statusCode: 201,
+  body: ''
+};
 
 exports.handler = async (event, context) => {
   const body = JSON.parse(event.body);
 
   try {
     // Validation
-    if (typeof body.description !== 'string' || typeof body.done !== 'boolean') {
-      throw new HTTPBadRequest('Validation Failed');
-    }
+    ValidateFields(body);
 
     // Command to DynamoDB
-    const params = {
-      TableName: TABLE_NAME,
-      Item: {
-        id: uuid.v1(),
-        description: body.description,
-        done: body.done
-      }
+    const newItem = {
+      id: generateUUID(),
+      description: body.description,
+      done: body.done
     };
-    const command = new PutCommand(params);
-    await dynamoDbClient.send(command);
+    await db.createTask(newItem);
 
     // Send Response
-    const response = {
-      statusCode: 201,
-      body: JSON.stringify(params.Item)
-    };
+    response.body = JSON.stringify(newItem);
+    response.statusCode = 201;
     return response;
   } catch (ex) {
-    // Send Response Error
     console.error(ex);
-    const response = {
-      statusCode: ex.statusCode || 500,
-      body: JSON.stringify({
-        message: ex.error_message || 'No se pudo crear el item'
-      })
-    };
+
+    // Send Response Error
+    let error = ex instanceof HTTPError ? ex : new HTTPInternalServerError();
+
+    response.body = JSON.stringify(error);
+    response.statusCode = error.statusCode;
     return response;
   }
 };
 
-class HTTPBadRequest extends Error {
-  constructor(args) {
-    super(args);
-    this.statusCode = 400;
-    this.error_message = args;
+const ValidateFields = (body) => {
+  if (!body.hasOwnProperty('description')) {
+    throw new HTTPBadRequestError("'description' field is required");
+  } else if (typeof body.description !== 'string') {
+    throw new HTTPBadRequestError("'description' field is a string");
   }
-}
+
+  if (!body.hasOwnProperty('done')) {
+    throw new HTTPBadRequestError("'done' field is required");
+  } else if (typeof body.done !== 'boolean') {
+    throw new HTTPBadRequestError("'done' field is a boolean");
+  }
+};
