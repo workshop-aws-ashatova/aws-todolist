@@ -2,11 +2,11 @@
 
 const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
 const {
-  ScanCommand,
-  GetCommand,
-  UpdateCommand,
-  PutCommand,
-  DeleteCommand
+  ScanCommand, //List elements
+  GetCommand, //Gets an element by key
+  UpdateCommand, //Updates an element by key
+  PutCommand, //Creates an element (also updates if exists but is not used here)
+  DeleteCommand //Deletes an element by key
 } = require('@aws-sdk/lib-dynamodb');
 
 const REGION = process.env.REGION;
@@ -47,7 +47,7 @@ exports.createTask = async ({ id, description, done }) => {
   const params = {
     TableName: TABLE_NAME,
     Item: {
-      id: id || '',
+      id: id,
       description: description || '',
       done: done || false
     }

@@ -6,7 +6,7 @@ provider:
   name: aws
   runtime: nodejs14.x
   stage: ${opt:stage}
-  region: us-east-1
+  region: ${opt:region}
   environment:
     STAGE: ${self:provider.stage}
     BASE_RESOURCES_NAME: ${self:service}-${self:provider.stage}
@@ -28,24 +28,6 @@ package:
   individually: true
   exclude:
     - '**/*'
-
-layers:
-  database:
-    name: ${self:provider.environment.BASE_RESOURCES_NAME}-layers-database
-    path: layers/database
-    compatibleRuntimes:
-      - nodejs14.x
-    package:
-      include:
-        - ./**
-  utils:
-    name: ${self:provider.environment.BASE_RESOURCES_NAME}-layers-utils
-    path: layers/utils
-    compatibleRuntimes:
-      - nodejs14.x
-    package:
-      include:
-        - ./**
 
 functions:
   create:
@@ -118,6 +100,24 @@ functions:
           path: tasks/{id}
           method: delete
           cors: true
+          
+layers:
+  database:
+    name: ${self:provider.environment.BASE_RESOURCES_NAME}-layers-database
+    path: layers/database
+    compatibleRuntimes:
+      - nodejs14.x
+    package:
+      include:
+        - ./**
+  utils:
+    name: ${self:provider.environment.BASE_RESOURCES_NAME}-layers-utils
+    path: layers/utils
+    compatibleRuntimes:
+      - nodejs14.x
+    package:
+      include:
+        - ./**
 
 resources:
   Resources:

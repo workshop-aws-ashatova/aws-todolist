@@ -26,6 +26,7 @@ exports.handler = async (event, context) => {
       description: body.description,
       done: body.done
     };
+
     await db.createTask(newItem);
 
     // Send Response
