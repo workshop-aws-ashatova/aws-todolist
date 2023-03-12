@@ -1,37 +1,30 @@
 'use strict';
 
-const { DynamoDBClient } = require('@aws-sdk/client-dynamodb');
-const { ScanCommand } = require('@aws-sdk/lib-dynamodb');
+const db = require('database');
+const { HTTPError, HTTPInternalServerError } = require('httpErrors');
 
-const TABLE_NAME = process.env.DYNAMODB_TABLE;
-const REGION = process.env.REGION;
-
-const dynamoDbClient = new DynamoDBClient({ region: REGION });
+const response = {
+  statusCode: 200,
+  body: ''
+};
 
 exports.handler = async (event, context) => {
   try {
     // Command to DynamoDB
-    const params = {
-      TableName: TABLE_NAME
-    };
-    const command = new ScanCommand(params);
-    const data = await dynamoDbClient.send(command);
+    const result = await db.listTasks();
 
     // Send Response
-    const response = {
-      statusCode: 200,
-      body: JSON.stringify(data.Items)
-    };
+    response.body = JSON.stringify(result);
+    response.statusCode = 200;
     return response;
   } catch (ex) {
-    // Send Response Error
     console.error(ex);
-    const response = {
-      statusCode: ex.statusCode || 500,
-      body: JSON.stringify({
-        message: 'No se pudo obtener los items'
-      })
-    };
+
+    // Send Response Error
+    let error = ex instanceof HTTPError ? ex : new HTTPInternalServerError();
+
+    response.body = JSON.stringify(error);
+    response.statusCode = error.statusCode;
     return response;
   }
 };
