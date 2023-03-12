@@ -8,9 +8,11 @@
     "build:layers:database": "(cd layers/database/nodejs && npm install && cp ./*.js ./node_modules)",
     "build:layers:utils": "(cd layers/utils/nodejs && npm install && cp ./*.js ./node_modules)",
     "build:layers": "npm run build:layers:database & npm run build:layers:utils",
-    "build": "npm run build:layers",
+    "build": "npm install && npm run build:layers",
     "deploy:dev": "serverless deploy --verbose --stage dev --region us-east-1",
-    "deploy:prod": "serverless deploy --verbose --stage prod --region us-east-1 --aws-profile default"
+    "deploy:prod": "serverless deploy --verbose --stage prod --region us-east-1 --aws-profile default",
+    "destroy:dev": "serverless remove --verbose --stage dev --region us-east-1",
+    "destroy:prod": "serverless remove --verbose --stage prod --region us-east-1 --aws-profile default"
   },
   "dependencies": {},
   "devDependencies": {
