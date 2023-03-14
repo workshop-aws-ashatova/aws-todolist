@@ -13,6 +13,8 @@ const response = {
 };
 
 exports.handler = async (event, context) => {
+  console.log('event', event);
+
   try {
     // Command to DynamoDB
     const result = await db.getTask(event.pathParameters.id);
@@ -33,5 +35,7 @@ exports.handler = async (event, context) => {
     response.body = JSON.stringify(error);
     response.statusCode = error.statusCode;
     return response;
+  } finally {
+    console.log('respose', response);
   }
 };

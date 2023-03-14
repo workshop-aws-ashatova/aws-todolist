@@ -14,7 +14,9 @@ const response = {
 };
 
 exports.handler = async (event, context) => {
+  console.log('event', event);
   const body = JSON.parse(event.body);
+  console.log('body', body);
 
   try {
     // Validation
@@ -47,6 +49,8 @@ exports.handler = async (event, context) => {
     response.body = JSON.stringify(error);
     response.statusCode = error.statusCode;
     return response;
+  } finally {
+    console.log('respose', response);
   }
 };
 

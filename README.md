@@ -2,7 +2,7 @@
 
 ## Overview
 
-![Arquitecture Diagram](arquitecture_diagram.png)
+![Architecture Diagram](architecture_diagram.png)
 
 ## Prerequisites
 
