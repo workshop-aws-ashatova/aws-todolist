@@ -17,17 +17,21 @@
 
 ### Deploy
 
+#### Bash
 ```bash
 npm run build
 npm run deploy:dev
 ```
 
+#### PowerShell
 ```powershell
 npm install
 cd layers/database/nodejs; npm install; Copy-item -Path ./*.js -Destination ./node_modules
 cd ../../..
 cd layers/utils/nodejs; npm install; Copy-item -Path ./*.js -Destination ./node_modules
 cd ../../..
+
+npm run deploy:dev
 ```
 
 ## Clean Up
