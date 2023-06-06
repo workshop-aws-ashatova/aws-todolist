@@ -22,6 +22,11 @@ npm run build
 npm run deploy:dev
 ```
 
+```powershell
+npm run build
+npm run deploy:dev
+```
+
 ## Clean Up
 
 ```bash
